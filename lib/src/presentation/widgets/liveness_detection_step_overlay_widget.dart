@@ -42,6 +42,7 @@ class LivenessDetectionStepOverlayWidgetState
   late final PageController _pageController;
   late CircularProgressWidget _circularProgressWidget;
 
+  bool _pageViewVisible = false;
   Timer? _countdownTimer;
   int _remainingDuration = 0;
 
@@ -59,6 +60,11 @@ class LivenessDetectionStepOverlayWidgetState
     super.initState();
     _initializeControllers();
     _initializeTimer();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _pageViewVisible = true;
+      });
+    });
     debugPrint('showCurrentStep ${widget.showCurrentStep}');
   }
 
@@ -245,7 +251,11 @@ class LivenessDetectionStepOverlayWidgetState
         const SizedBox(height: 16),
         _buildFaceDetectionStatus(),
         const SizedBox(height: 16),
-        _buildStepPageView(),
+        Visibility(
+          visible: _pageViewVisible,
+          replacement: const CircularProgressIndicator.adaptive(),
+          child: _buildStepPageView(),
+        ),
         const SizedBox(height: 16),
         widget.isDarkMode ? _buildLoaderDarkMode() : _buildLoaderLightMode(),
       ],
