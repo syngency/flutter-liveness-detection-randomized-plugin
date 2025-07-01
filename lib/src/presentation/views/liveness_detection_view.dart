@@ -507,10 +507,6 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       return const Center(child: CircularProgressIndicator.adaptive());
     }
 
-    final size = MediaQuery.of(context).size;
-    var scale = size.aspectRatio * _cameraController!.value.aspectRatio;
-    if (scale < 1) scale = 1 / scale;
-
     return Stack(
       children: [
         Container(
@@ -519,6 +515,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
           color: widget.isDarkMode ? Colors.black : Colors.white,
         ),
         LivenessDetectionStepOverlayWidget(
+          cameraController: _cameraController,
           duration: widget.config.durationLivenessVerify,
           showDurationUiText: widget.config.showDurationUiText,
           isDarkMode: widget.isDarkMode,
