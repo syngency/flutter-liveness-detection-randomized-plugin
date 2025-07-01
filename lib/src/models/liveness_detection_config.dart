@@ -7,6 +7,7 @@ class LivenessDetectionConfig {
   final bool useCustomizedLabel;
   final LivenessDetectionLabelModel? customizedLabel;
   final bool isEnableMaxBrightness;
+  final int imageQuality;
 
   LivenessDetectionConfig({
     this.startWithInfoScreen = false,
@@ -14,6 +15,7 @@ class LivenessDetectionConfig {
     this.showDurationUiText = false,
     this.useCustomizedLabel = false,
     this.customizedLabel,
-    this.isEnableMaxBrightness = true
+    this.isEnableMaxBrightness = true,
+    this.imageQuality = 100,
   });
 }

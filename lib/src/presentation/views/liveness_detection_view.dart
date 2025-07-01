@@ -4,6 +4,8 @@ import 'package:flutter_liveness_detection_randomized_plugin/index.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/src/core/constants/liveness_detection_step_constant.dart';
 import 'package:collection/collection.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 
 List<CameraDescription> availableCams = [];
 
@@ -87,6 +89,37 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       }
     } else {
       list.shuffle(Random());
+    }
+  }
+
+  Future<XFile?> _compressImage(XFile originalFile) async {
+    final int quality = widget.config.imageQuality;
+
+    if (quality >= 100) {
+      return originalFile;
+    }
+
+    try {
+      final bytes = await originalFile.readAsBytes();
+
+      final img.Image? originalImage = img.decodeImage(bytes);
+      if (originalImage == null) {
+        return originalFile;
+      }
+
+      final tempDir = await getTemporaryDirectory();
+      final String targetPath =
+          '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      final compressedBytes = img.encodeJpg(originalImage, quality: quality);
+
+      final File compressedFile =
+          await File(targetPath).writeAsBytes(compressedBytes);
+
+      return XFile(compressedFile.path);
+    } catch (e) {
+      debugPrint("Error compressing image: $e");
+      return originalFile;
     }
   }
 
@@ -184,7 +217,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
 
   void _preInitCallBack() {
     _isInfoStepCompleted = !widget.config.startWithInfoScreen;
-     shuffleListLivenessChallenge(
+    shuffleListLivenessChallenge(
         list: widget.config.useCustomizedLabel &&
                 widget.config.customizedLabel != null
             ? customizedLivenessLabel(widget.config.customizedLabel!)
@@ -373,25 +406,37 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       final XFile? clickedImage = await _cameraController?.takePicture();
       if (clickedImage == null) {
         _startLiveFeed();
+        if (mounted) setState(() => _isTakingPicture = false);
         return;
       }
-      debugPrint('Image path: ${clickedImage.path}');
-      _onDetectionCompleted(imgToReturn: clickedImage);
+
+      final XFile? finalImage = await _compressImage(clickedImage);
+
+      debugPrint('Final image path: ${finalImage?.path}');
+      _onDetectionCompleted(imgToReturn: finalImage);
     } catch (e) {
+      debugPrint('Error taking picture: $e');
+      if (mounted) setState(() => _isTakingPicture = false);
       _startLiveFeed();
     }
   }
 
-  void _onDetectionCompleted({XFile? imgToReturn}) {
+  void _onDetectionCompleted({XFile? imgToReturn}) async {
     final String? imgPath = imgToReturn?.path;
+    final File imageFile = File(imgPath ?? "");
+    final int fileSizeInBytes = await imageFile.length();
+    final double sizeInKb = fileSizeInBytes / 1024;
+    debugPrint('Image result size : ${sizeInKb.toStringAsFixed(2)} KB');
     if (widget.isEnableSnackBar) {
       final snackBar = SnackBar(
         content: Text(imgToReturn == null
             ? 'Verification of liveness detection failed, please try again. (Exceeds time limit ${widget.config.durationLivenessVerify ?? 45} second.)'
             : 'Verification of liveness detection success!'),
       );
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
+    if (!mounted) return;
     Navigator.of(context).pop(imgPath);
   }
 
