@@ -26,6 +26,7 @@ Face stretching already fixed on this version
 - 🎭 Customizable liveness challenge labels
 - ⏳ Flexible security verification duration
 - 🎲 Adjustable number of liveness challenges
+- 🛠️ Adjustable image quality result
 
 ## Getting Started 🌟
 
