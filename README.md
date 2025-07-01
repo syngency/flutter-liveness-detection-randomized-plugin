@@ -29,7 +29,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_liveness_detection_randomized_plugin: ^1.0.5
+  flutter_liveness_detection_randomized_plugin: ^1.0.6
 ```
 
 ## Customized Steps Label
