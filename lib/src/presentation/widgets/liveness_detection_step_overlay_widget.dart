@@ -7,22 +7,25 @@ class LivenessDetectionStepOverlayWidget extends StatefulWidget {
   final List<LivenessDetectionStepItem> steps;
   final VoidCallback onCompleted;
   final Widget camera;
+  final CameraController? cameraController;
   final bool isFaceDetected;
   final bool showCurrentStep;
   final bool isDarkMode;
   final bool showDurationUiText;
   final int? duration;
 
-  const LivenessDetectionStepOverlayWidget(
-      {super.key,
-      required this.steps,
-      required this.onCompleted,
-      required this.camera,
-      required this.isFaceDetected,
-      this.showCurrentStep = false,
-      this.isDarkMode = true,
-      this.showDurationUiText = false,
-      this.duration});
+  const LivenessDetectionStepOverlayWidget({
+    super.key,
+    required this.steps,
+    required this.onCompleted,
+    required this.camera,
+    required this.cameraController,
+    required this.isFaceDetected,
+    this.showCurrentStep = false,
+    this.isDarkMode = true,
+    this.showDurationUiText = false,
+    this.duration,
+  });
 
   @override
   State<LivenessDetectionStepOverlayWidget> createState() =>
@@ -39,7 +42,7 @@ class LivenessDetectionStepOverlayWidgetState
   late final PageController _pageController;
   late CircularProgressWidget _circularProgressWidget;
 
-  // Add timer and remaining duration variables
+  bool _pageViewVisible = false;
   Timer? _countdownTimer;
   int _remainingDuration = 0;
 
@@ -57,6 +60,11 @@ class LivenessDetectionStepOverlayWidgetState
     super.initState();
     _initializeControllers();
     _initializeTimer();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _pageViewVisible = true;
+      });
+    });
     debugPrint('showCurrentStep ${widget.showCurrentStep}');
   }
 
@@ -85,13 +93,29 @@ class LivenessDetectionStepOverlayWidgetState
   }
 
   CircularProgressWidget _buildCircularIndicator() {
+    double scale = 1.0;
+    if (widget.cameraController != null &&
+        widget.cameraController!.value.isInitialized) {
+      final cameraAspectRatio = widget.cameraController!.value.aspectRatio;
+      const containerAspectRatio = 1.0;
+      scale = cameraAspectRatio / containerAspectRatio;
+      if (scale < 1.0) {
+        scale = 1.0 / scale;
+      }
+    }
+
     return CircularProgressWidget(
       unselectedColor: Colors.grey,
       selectedColor: Colors.green,
       heightLine: _heightLine,
       current: _currentStepIndicator,
       maxStep: _indicatorMaxStep,
-      child: widget.camera,
+      child: Transform.scale(
+        scale: scale,
+        child: Center(
+          child: widget.camera,
+        ),
+      ),
     );
   }
 
@@ -227,7 +251,11 @@ class LivenessDetectionStepOverlayWidgetState
         const SizedBox(height: 16),
         _buildFaceDetectionStatus(),
         const SizedBox(height: 16),
-        _buildStepPageView(),
+        Visibility(
+          visible: _pageViewVisible,
+          replacement: const CircularProgressIndicator.adaptive(),
+          child: _buildStepPageView(),
+        ),
         const SizedBox(height: 16),
         widget.isDarkMode ? _buildLoaderDarkMode() : _buildLoaderLightMode(),
       ],

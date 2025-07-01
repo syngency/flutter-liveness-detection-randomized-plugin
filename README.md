@@ -11,6 +11,10 @@ A Flutter plugin for liveness detection with randomized challenge response metho
 
 https://github.com/user-attachments/assets/f7266dc9-c4a2-4fba-8684-0ead2f678180
 
+## Update 1.0.6
+![Slide 16_9 - 9](https://github.com/user-attachments/assets/3a9b187a-ccfd-4542-a8d9-88b7ef7903a9)
+Face stretching already fixed on this version
+
 ## Features ✨
 
 - 📱 Real-time face detection
@@ -22,6 +26,7 @@ https://github.com/user-attachments/assets/f7266dc9-c4a2-4fba-8684-0ead2f678180
 - 🎭 Customizable liveness challenge labels
 - ⏳ Flexible security verification duration
 - 🎲 Adjustable number of liveness challenges
+- 🛠️ Adjustable image quality result
 
 ## Getting Started 🌟
 
@@ -29,7 +34,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  flutter_liveness_detection_randomized_plugin: ^1.0.5
+  flutter_liveness_detection_randomized_plugin: ^1.0.6
 ```
 
 ## Customized Steps Label
