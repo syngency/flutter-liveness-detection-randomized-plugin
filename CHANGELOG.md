@@ -1,3 +1,8 @@
+## 1.0.6 🚀
+- 🛠️ Fix issue camera preview freeze while start liveness detection
+- 🎨 Face preview now looks better, no longer stretching
+- 🎨 Add parameter to adjust image quality liveness result
+
 ## 1.0.5 🚀
 
 - 🛠️ Improve security liveness challenge
