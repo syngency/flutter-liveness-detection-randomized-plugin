@@ -1,3 +1,7 @@
+## 1.0.7 🚀
+
+- ⚡ Update google_mlkit_face_detection for better compability to newest flutter version
+
 ## 1.0.6 🚀
 - 🛠️ Fix issue camera preview freeze while start liveness detection
 - 🎨 Face preview now looks better, no longer stretching
