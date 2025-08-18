@@ -176,7 +176,7 @@ class _LivenessDetectionTutorialScreenState
                   width: 10,
                 ),
                 Text(
-                  'Package Version: 1.0.6',
+                  'Package Version: 1.0.7',
                   style: TextStyle(color: Colors.grey),
                 )
               ],
