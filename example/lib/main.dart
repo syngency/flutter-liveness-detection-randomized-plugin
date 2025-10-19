@@ -17,6 +17,8 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   List<String?> capturedImages = [];
   String? imgPath;
+  
+  Map<String, String>? images;
 
   @override
   void initState() {
@@ -59,7 +61,7 @@ class _HomeViewState extends State<HomeView> {
           ElevatedButton.icon(
               icon: const Icon(Icons.camera_alt_rounded),
               onPressed: () async {
-                final String? response =
+                final Map<String,String>? response =
                     await FlutterLivenessDetectionRandomizedPlugin.instance
                         .livenessDetection(
                   context: context,
@@ -95,7 +97,7 @@ class _HomeViewState extends State<HomeView> {
                 );
                 if (mounted) {
                   setState(() {
-                    imgPath = response; // result liveness
+                    images = response; // result liveness
                   });
                 }
               },

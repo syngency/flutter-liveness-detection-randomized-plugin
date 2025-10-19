@@ -1,12 +1,12 @@
 name: flutter_liveness_detection_randomized_plugin
-description: "A Flutter plugin for liveness detection with randomized challenge response method"
+description: "Syngency fork"
 version: 1.0.7
 homepage: "https://bagussubagja.vercel.app"
 repository: "https://github.com/bagussubagja/flutter-liveness-detection-randomized-plugin"
 
 environment:
   sdk: ^3.5.3
-  flutter: '>=3.3.0'
+  flutter: ">=3.3.0"
 
 dependencies:
   flutter:

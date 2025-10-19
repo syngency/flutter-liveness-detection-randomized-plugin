@@ -10,7 +10,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
     return _thresholds;
   }
 
-  Future<String?> livenessDetection({
+  Future<Map<String,String>?> livenessDetection({
     required BuildContext context,
     required LivenessDetectionConfig config,
     required bool isEnableSnackBar,
@@ -18,7 +18,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
     required bool showCurrentStep,
     required bool isDarkMode,
   }) async {
-    final String? capturedFacePath = await Navigator.of(context).push(
+    final Map<String,String>? capturedFacePath = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => LivenessDetectionView(
           config: config,

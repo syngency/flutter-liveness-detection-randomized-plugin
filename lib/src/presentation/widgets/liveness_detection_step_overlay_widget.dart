@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 class LivenessDetectionStepOverlayWidget extends StatefulWidget {
   final List<LivenessDetectionStepItem> steps;
   final VoidCallback onCompleted;
+  final Function(LivenessDetectionStep)? onStepCompleted;
   final Widget camera;
   final CameraController? cameraController;
   final bool isFaceDetected;
@@ -21,6 +22,7 @@ class LivenessDetectionStepOverlayWidget extends StatefulWidget {
     required this.camera,
     required this.cameraController,
     required this.isFaceDetected,
+    this.onStepCompleted,
     this.showCurrentStep = false,
     this.isDarkMode = true,
     this.showDurationUiText = false,
@@ -32,8 +34,7 @@ class LivenessDetectionStepOverlayWidget extends StatefulWidget {
       LivenessDetectionStepOverlayWidgetState();
 }
 
-class LivenessDetectionStepOverlayWidgetState
-    extends State<LivenessDetectionStepOverlayWidget> {
+class LivenessDetectionStepOverlayWidgetState extends State<LivenessDetectionStepOverlayWidget> {
   int get currentIndex => _currentIndex;
 
   bool _isLoading = false;
@@ -94,8 +95,7 @@ class LivenessDetectionStepOverlayWidgetState
 
   CircularProgressWidget _buildCircularIndicator() {
     double scale = 1.0;
-    if (widget.cameraController != null &&
-        widget.cameraController!.value.isInitialized) {
+    if (widget.cameraController != null && widget.cameraController!.value.isInitialized) {
       final cameraAspectRatio = widget.cameraController!.value.aspectRatio;
       const containerAspectRatio = 1.0;
       scale = cameraAspectRatio / containerAspectRatio;
@@ -129,7 +129,7 @@ class LivenessDetectionStepOverlayWidgetState
   Future<void> nextPage() async {
     if (_isLoading) return;
 
-    if (_currentIndex + 1 <= widget.steps.length - 1) {
+    if (_currentIndex < widget.steps.length - 1) {
       await _handleNextStep();
     } else {
       await _handleCompletion();
@@ -138,6 +138,7 @@ class LivenessDetectionStepOverlayWidgetState
 
   Future<void> _handleNextStep() async {
     _showLoader();
+    widget.onStepCompleted?.call(widget.steps[_currentIndex].step);
     await Future.delayed(const Duration(milliseconds: 100));
     await _pageController.nextPage(
       duration: const Duration(milliseconds: 1),
@@ -149,7 +150,7 @@ class LivenessDetectionStepOverlayWidgetState
   }
 
   Future<void> _handleCompletion() async {
-    _updateState();
+    //_updateState();
     await Future.delayed(const Duration(milliseconds: 500));
     widget.onCompleted();
   }
@@ -202,10 +203,7 @@ class LivenessDetectionStepOverlayWidgetState
                       children: [
                         Text(
                           'Back',
-                          style: TextStyle(
-                              color: widget.isDarkMode
-                                  ? Colors.white
-                                  : Colors.black),
+                          style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
                         ),
                         Visibility(
                           replacement: const SizedBox.shrink(),
@@ -213,26 +211,19 @@ class LivenessDetectionStepOverlayWidgetState
                           child: Text(
                             _getRemainingTimeText(_remainingDuration),
                             style: TextStyle(
-                              color: widget.isDarkMode
-                                  ? Colors.white
-                                  : Colors.black,
+                              color: widget.isDarkMode ? Colors.white : Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                         Text(
                           stepCounter,
-                          style: TextStyle(
-                              color: widget.isDarkMode
-                                  ? Colors.white
-                                  : Colors.black),
+                          style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
                         )
                       ],
                     )
                   : Text('Back',
-                      style: TextStyle(
-                          color:
-                              widget.isDarkMode ? Colors.white : Colors.black)),
+                      style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black)),
             ),
             _buildBody(),
           ],
@@ -294,8 +285,7 @@ class LivenessDetectionStepOverlayWidgetState
                 )
               : ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                      widget.isFaceDetected ? Colors.green : Colors.black,
-                      BlendMode.modulate),
+                      widget.isFaceDetected ? Colors.green : Colors.black, BlendMode.modulate),
                   child: LottieBuilder.asset(
                     widget.isFaceDetected
                         ? 'packages/flutter_liveness_detection_randomized_plugin/src/core/assets/face-detected.json'
@@ -307,8 +297,7 @@ class LivenessDetectionStepOverlayWidgetState
         const SizedBox(width: 16),
         Text(
           widget.isFaceDetected ? 'User Face Found' : 'User Face Not Found...',
-          style:
-              TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
+          style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
         ),
       ],
     );
