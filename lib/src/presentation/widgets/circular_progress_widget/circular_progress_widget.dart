@@ -15,7 +15,7 @@ class CircularProgressWidget extends StatefulWidget {
     this.widthLine = 3,
     this.heightLine = 20,
     this.curve = Curves.easeInOutQuint,
-    this.duration = const Duration(seconds: 2),
+    this.duration = const Duration(milliseconds: 600),
   });
 
   final double current;

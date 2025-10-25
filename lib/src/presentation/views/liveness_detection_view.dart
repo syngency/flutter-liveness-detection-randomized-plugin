@@ -137,42 +137,42 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
     if (!_isShuffled) {
       List<LivenessDetectionStepItem> customizedSteps = [];
 
-      if (label.blink != "" && widget.config.useCustomizedLabel) {
+      if (label.blink != null && widget.config.useCustomizedLabel) {
         customizedSteps.add(LivenessDetectionStepItem(
           step: LivenessDetectionStep.blink,
           title: label.blink ?? "Blink 2-3 Times",
         ));
       }
 
-      if (label.lookRight != "" && widget.config.useCustomizedLabel) {
+      if (label.lookRight != null && widget.config.useCustomizedLabel) {
         customizedSteps.add(LivenessDetectionStepItem(
           step: LivenessDetectionStep.lookRight,
           title: label.lookRight ?? "Look Right",
         ));
       }
 
-      if (label.lookLeft != "" && widget.config.useCustomizedLabel) {
+      if (label.lookLeft != null && widget.config.useCustomizedLabel) {
         customizedSteps.add(LivenessDetectionStepItem(
           step: LivenessDetectionStep.lookLeft,
           title: label.lookLeft ?? "Look Left",
         ));
       }
 
-      if (label.lookUp != "" && widget.config.useCustomizedLabel) {
+      if (label.lookUp != null && widget.config.useCustomizedLabel) {
         customizedSteps.add(LivenessDetectionStepItem(
           step: LivenessDetectionStep.lookUp,
           title: label.lookUp ?? "Look Up",
         ));
       }
 
-      if (label.lookDown != "" && widget.config.useCustomizedLabel) {
+      if (label.lookDown != null && widget.config.useCustomizedLabel) {
         customizedSteps.add(LivenessDetectionStepItem(
           step: LivenessDetectionStep.lookDown,
           title: label.lookDown ?? "Look Down",
         ));
       }
 
-      if (label.smile != "" && widget.config.useCustomizedLabel) {
+      if (label.smile != null && widget.config.useCustomizedLabel) {
         customizedSteps.add(LivenessDetectionStepItem(
           step: LivenessDetectionStep.smile,
           title: label.smile ?? "Smile",
@@ -323,9 +323,10 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
           }
         }
       }
-    } else {
-      _resetSteps();
     }
+    // } else {
+    //   _resetSteps();
+    // }
 
     _isBusy = false;
     if (mounted) setState(() {});
@@ -368,42 +369,43 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
 
   Future<void> _completeStep({required LivenessDetectionStep step}) async {
     if (mounted) setState(() {});
+    await Future.delayed(const Duration(milliseconds: 500), () async {
+      await _takePicture();
+    });
     await _stepsKey.currentState?.nextPage();
     _stopProcessing();
   }
 
   Future<void> _takePicture() async {
     try {
-      if (_cameraController == null || _isTakingPicture) return;
-
-      if (mounted) setState(() => _isTakingPicture = true);
+      if (_cameraController == null || _isTakingPicture) {
+        return;
+      }
+      if (mounted) {
+        setState(() => _isTakingPicture = true);
+      }
       await _cameraController?.stopImageStream();
 
       final XFile? clickedImage = await _cameraController?.takePicture();
-      if (clickedImage == null) {
-        _startLiveFeed();
-        if (mounted) setState(() => _isTakingPicture = false);
-        return;
+      if (clickedImage != null) {
+        // final XFile image = _compressImage(clickedImage);
+        final currentIndex = _stepsKey.currentState?.currentIndex;
+        images[_cachedShuffledSteps[currentIndex ?? 0].step.name] = clickedImage.path;
       }
-
-      final XFile? image = await _compressImage(clickedImage);
-      final currentIndex = _stepsKey.currentState?.currentIndex;
-      if (image != null) {
-        images[_cachedShuffledSteps[currentIndex ?? 0].step.name] = image.path;
-      }
-    } catch (e) {
-      debugPrint('Error taking picture: $e');
-      if (mounted) setState(() => _isTakingPicture = false);
-      _startLiveFeed();
+    } catch (e, s) {
+      debugPrint(e.toString());
+      debugPrintStack(stackTrace: s);
     }
+    if (mounted) {
+      setState(() => _isTakingPicture = false);
+    }
+    _cameraController?.startImageStream(_processCameraImage);
   }
 
   void _onDetectionCompleted() async {
     if (widget.isEnableSnackBar) {
       final snackBar = SnackBar(
-        content: Text(images.isEmpty
-            ? 'No images'
-            : 'Verification of liveness detection success!'),
+        content: Text(images.isEmpty ? 'No images' : 'Verification of liveness detection success!'),
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -412,7 +414,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
     Navigator.of(context).pop(images);
   }
 
-  void _resetSteps() {
+/*   void _resetSteps() {
     if (widget.config.useCustomizedLabel) {
       for (var step in customizedLivenessLabel(widget.config.customizedLabel!)) {
         final index = customizedLivenessLabel(widget.config.customizedLabel!)
@@ -435,7 +437,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       if (mounted) setState(() {});
     }
   }
-
+ */
   void _startProcessing() {
     if (!mounted) return;
     if (mounted) setState(() => _isProcessingStep = true);
@@ -500,13 +502,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
           // const Duration(milliseconds: 500),
           // () => _takePicture(step.name),
           //),
-          onCompleted: () => Future.delayed(
-            const Duration(milliseconds: 500),
-            () async {
-              await _takePicture();
-              _onDetectionCompleted();
-            },
-          ),
+          onCompleted: _onDetectionCompleted,
         ),
       ],
     );

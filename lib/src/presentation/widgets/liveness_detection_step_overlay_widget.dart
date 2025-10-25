@@ -110,6 +110,7 @@ class LivenessDetectionStepOverlayWidgetState extends State<LivenessDetectionSte
       heightLine: _heightLine,
       current: _currentStepIndicator,
       maxStep: _indicatorMaxStep,
+      duration: const Duration(milliseconds: 300),
       child: Transform.scale(
         scale: scale,
         child: Center(
@@ -144,14 +145,13 @@ class LivenessDetectionStepOverlayWidgetState extends State<LivenessDetectionSte
       duration: const Duration(milliseconds: 1),
       curve: Curves.easeIn,
     );
-    await Future.delayed(const Duration(seconds: 1));
     _hideLoader();
     _updateState();
   }
 
   Future<void> _handleCompletion() async {
-    //_updateState();
-    await Future.delayed(const Duration(milliseconds: 500));
+    _updateState();
+    await Future.delayed(const Duration(seconds: 1));
     widget.onCompleted();
   }
 
@@ -334,7 +334,7 @@ class LivenessDetectionStepOverlayWidgetState extends State<LivenessDetectionSte
           textAlign: TextAlign.center,
           style: TextStyle(
             color: widget.isDarkMode ? Colors.white : Colors.black,
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: FontWeight.w500,
           ),
         ),
